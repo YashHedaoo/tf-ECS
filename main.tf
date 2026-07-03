@@ -21,10 +21,12 @@ module "secrets" {
 }
 
 module "ecs_cluster" {
-  source       = "./modules/ecs-cluster"
-  cluster_name = var.cluster_name
-  environment  = var.environment
-  tags         = var.tags
+  source              = "./modules/ecs-cluster"
+  cluster_name        = var.cluster_name
+  create_cluster      = var.create_cluster
+  existing_cluster_id = var.existing_cluster_id
+  environment         = var.environment
+  tags                = var.tags
 }
 
 module "ecs_capacity" {

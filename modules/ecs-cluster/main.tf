@@ -1,5 +1,6 @@
 resource "aws_ecs_cluster" "main" {
-  name = "${var.cluster_name}-${var.environment}"
+  count = var.create_cluster ? 1 : 0
+  name  = "${var.cluster_name}-${var.environment}"
 
   setting {
     name  = "containerInsights"

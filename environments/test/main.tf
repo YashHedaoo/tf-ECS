@@ -8,6 +8,8 @@ module "ecs_oneagent_integration" {
   environment          = "test"
   instance_type        = var.instance_type
   cluster_name         = var.cluster_name
+  create_cluster       = var.create_cluster
+  existing_cluster_id  = var.existing_cluster_id
   ami_id               = var.ami_id
   availability_zones   = var.availability_zones
 }

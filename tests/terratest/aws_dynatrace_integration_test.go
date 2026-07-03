@@ -36,9 +36,10 @@ func TestAwsDynatraceEcsDaemonIntegration(t *testing.T) {
 
 	// Assert that the plan contains all expected resources
 	assert.Contains(t, planOutput, "module.ecs_oneagent_integration.module.networking.aws_vpc.main")
-	assert.Contains(t, planOutput, "module.ecs_oneagent_integration.module.ecs_cluster.aws_ecs_cluster.main")
-	assert.Contains(t, planOutput, "module.ecs_oneagent_integration.module.oneagent.aws_ecs_service.oneagent")
 	assert.Contains(t, planOutput, "module.ecs_oneagent_integration.module.secrets.aws_secretsmanager_secret.api_url")
 	assert.Contains(t, planOutput, "module.ecs_oneagent_integration.module.ecs_capacity.aws_launch_template.ecs")
 	assert.Contains(t, planOutput, "module.ecs_oneagent_integration.module.ecs_capacity.aws_autoscaling_group.ecs")
+	assert.Contains(t, planOutput, "module.ecs_oneagent_integration.module.oneagent.aws_ecs_task_definition.oneagent")
+	assert.Contains(t, planOutput, "module.ecs_oneagent_integration.module.auto_observability.aws_lambda_function.auto_observability")
+	assert.Contains(t, planOutput, "module.ecs_oneagent_integration.module.auto_observability.aws_cloudwatch_event_rule.scheduler")
 }

@@ -37,11 +37,11 @@ run "validate_iam_configuration" {
   }
 }
 
-run "validate_oneagent_task_def" {
+run "validate_auto_observability_lambda" {
   command = plan
 
   assert {
-    condition     = module.oneagent.service_name == "dynatrace-oneagent-dev"
-    error_message = "OneAgent ECS Service name did not match expected DAEMON service name"
+    condition     = module.auto_observability.lambda_function_name == "ecs-auto-observability-dev"
+    error_message = "Lambda function name did not match expected value"
   }
 }

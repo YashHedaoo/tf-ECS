@@ -8,9 +8,9 @@ output "ecs_cluster_name" {
   value       = module.ecs_cluster.cluster_name
 }
 
-output "oneagent_service_name" {
-  description = "The name of the Dynatrace OneAgent Daemon service"
-  value       = module.oneagent.service_name
+output "auto_observability_lambda_arn" {
+  description = "The ARN of the Lambda Auto-Observability Controller"
+  value       = module.auto_observability.lambda_function_arn
 }
 
 output "api_url_secret_arn" {

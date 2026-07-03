@@ -64,3 +64,12 @@ module "oneagent" {
     module.ecs_capacity
   ]
 }
+
+module "auto_observability" {
+  source                       = "./modules/ecs-auto-observability"
+  oneagent_task_definition_arn = module.oneagent.task_definition_arn
+  ecs_task_execution_role_arn  = module.iam.ecs_task_execution_role_arn
+  ecs_task_role_arn            = module.iam.ecs_task_role_arn
+  environment                  = var.environment
+  tags                         = var.tags
+}

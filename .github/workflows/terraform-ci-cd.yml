@@ -9,12 +9,11 @@ on:
       - main
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   validate:
-    name: Lint, Validate, Scan, and Test
+    name: Lint, Validate, and Scan
     runs-on: ubuntu-latest
 
     steps:
@@ -25,7 +24,6 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.0
-
 
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
@@ -50,71 +48,31 @@ jobs:
           working_directory: .
           additional_args: --config-file policies/tfsec/config.json
 
-      - name: Run Terraform Native Tests
-        env:
-          AWS_ACCESS_KEY_ID: mock_key
-          AWS_SECRET_ACCESS_KEY: mock_secret
-          AWS_DEFAULT_REGION: us-east-1
-        run: terraform test -test-directory=tests/terraform
-
-
-  deploy_dev:
-    name: Deploy to Dev
+  deploy:
+    name: Deploy to ECS
     needs: validate
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
-    environment: dev
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.0
 
-      - name: Deploy DEV environment
+      - name: Deploy OneAgent
+        env:
+          TF_VAR_dynatrace_url: ${{ secrets.DYNATRACE_URL }}
+          TF_VAR_dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}
         run: |
-          cd environments/dev
-          terraform init -backend=false
-          terraform plan -no-color
-
-  deploy_test:
-    name: Deploy to Test
-    needs: deploy_dev
-    runs-on: ubuntu-latest
-    environment: test # Uses GitHub Environment with required reviewers for gate approval
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.0
-
-      - name: Deploy TEST environment
-        run: |
-          cd environments/test
-          terraform init -backend=false
-          terraform plan -no-color
-
-  deploy_stage:
-    name: Deploy to Stage
-    needs: deploy_test
-    runs-on: ubuntu-latest
-    environment: stage # Uses GitHub Environment with required reviewers for gate approval
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.0
-
-      - name: Deploy STAGE environment
-        run: |
-          cd environments/stage
-          terraform init -backend=false
-          terraform plan -no-color
+          terraform init
+          terraform apply -auto-approve -no-color

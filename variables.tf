@@ -24,6 +24,7 @@ variable "aws_region" {
 variable "environment" {
   type        = string
   description = "The deployment environment (e.g. dev, test, stage)"
+  default     = "production"
 }
 
 variable "cluster_name" {

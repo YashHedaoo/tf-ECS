@@ -48,12 +48,6 @@ variable "tags" {
   }
 }
 
-variable "monitored_clusters" {
-  type        = list(string)
-  description = "List of ECS cluster names where Dynatrace OneAgent should be deployed. Use ['*'] to monitor all clusters."
-  default     = ["*"]
-}
-
 variable "oneagent_installer_script_url" {
   type        = string
   description = "The Dynatrace OneAgent installer script URL (e.g., https://<env-id>.live.dynatrace.com/api/v1/deployment/installer/...)"

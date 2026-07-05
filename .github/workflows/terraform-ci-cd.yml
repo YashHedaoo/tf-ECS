@@ -43,7 +43,6 @@ jobs:
           TF_VAR_dynatrace_url: ${{ secrets.DYNATRACE_URL }}
           TF_VAR_dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}
           TF_VAR_oneagent_installer_script_url: ${{ secrets.ONEAGENT_INSTALLER_SCRIPT_URL }}
-          TF_VAR_monitored_clusters: ${{ secrets.MONITORED_CLUSTERS }}
           TF_VAR_cluster_name: ${{ github.event.inputs.cluster_name != '' && github.event.inputs.cluster_name || 'ecs-oneagent-cluster' }}
         run: |
           terraform init
@@ -55,24 +54,14 @@ jobs:
       - name: Collecting and Observing Clusters
         env:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-          MONITORED_CLUSTERS: ${{ secrets.MONITORED_CLUSTERS }}
         run: |
-          CLUSTER_ARG=""
-          if [ "${{ github.event.inputs.cluster_name }}" != "" ]; then
-            CLUSTER_ARG="--cluster ${{ github.event.inputs.cluster_name }}"
-          fi
-          python3 .github/scripts/manage_oneagent.py --observe $CLUSTER_ARG
+          python3 .github/scripts/manage_oneagent.py --observe
 
       - name: Installing OneAgent in Missing Clusters
         env:
           ENVIRONMENT: "production"
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
-          MONITORED_CLUSTERS: ${{ secrets.MONITORED_CLUSTERS }}
         run: |
           ONEAGENT_TASK_DEFINITION_ARN=$(terraform output -raw oneagent_task_definition_arn)
           export ONEAGENT_TASK_DEFINITION_ARN
-          CLUSTER_ARG=""
-          if [ "${{ github.event.inputs.cluster_name }}" != "" ]; then
-            CLUSTER_ARG="--cluster ${{ github.event.inputs.cluster_name }}"
-          fi
-          python3 .github/scripts/manage_oneagent.py --install $CLUSTER_ARG
+          python3 .github/scripts/manage_oneagent.py --install

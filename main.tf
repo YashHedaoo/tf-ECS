@@ -43,5 +43,4 @@ module "auto_observability" {
   ecs_task_role_arn            = module.iam.ecs_task_role_arn
   environment                  = var.environment
   tags                         = local.project_tags
-  monitored_clusters           = var.monitored_clusters
 }

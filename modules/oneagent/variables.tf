@@ -61,3 +61,10 @@ variable "tags" {
   description = "Tags to apply to all resources"
   default     = {}
 }
+
+variable "oneagent_installer_script_url" {
+  type        = string
+  description = "The Dynatrace OneAgent installer script URL"
+  default     = ""
+}
+

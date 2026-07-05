@@ -48,16 +48,17 @@ module "ecs_capacity" {
 }
 
 module "oneagent" {
-  source                      = "./modules/oneagent"
-  ecs_cluster_id              = module.ecs_cluster.cluster_id
-  ecs_cluster_name            = module.ecs_cluster.cluster_name
-  ecs_task_execution_role_arn = module.iam.ecs_task_execution_role_arn
-  ecs_task_role_arn           = module.iam.ecs_task_role_arn
-  api_url_secret_arn          = module.secrets.api_url_secret_arn
-  paas_token_secret_arn       = module.secrets.paas_token_secret_arn
-  aws_region                  = var.aws_region
-  environment                 = var.environment
-  tags                        = var.tags
+  source                        = "./modules/oneagent"
+  ecs_cluster_id                = module.ecs_cluster.cluster_id
+  ecs_cluster_name              = module.ecs_cluster.cluster_name
+  ecs_task_execution_role_arn   = module.iam.ecs_task_execution_role_arn
+  ecs_task_role_arn             = module.iam.ecs_task_role_arn
+  api_url_secret_arn            = module.secrets.api_url_secret_arn
+  paas_token_secret_arn         = module.secrets.paas_token_secret_arn
+  aws_region                    = var.aws_region
+  environment                   = var.environment
+  tags                          = var.tags
+  oneagent_installer_script_url = var.oneagent_installer_script_url
 
   # Ensure instances are registered before launching Daemon service
   depends_on = [
@@ -72,4 +73,7 @@ module "auto_observability" {
   ecs_task_role_arn            = module.iam.ecs_task_role_arn
   environment                  = var.environment
   tags                         = var.tags
+  monitored_clusters           = var.monitored_clusters
+  project_tag_key              = var.project_tag_key
+  project_tag_value            = var.project_tag_value
 }

@@ -40,6 +40,10 @@ resource "aws_ecs_task_definition" "oneagent" {
         {
           name  = "DT_CLUSTER_ID"
           value = var.ecs_cluster_name
+        },
+        {
+          name  = "ONEAGENT_INSTALLER_SCRIPT_URL"
+          value = var.oneagent_installer_script_url
         }
       ]
 

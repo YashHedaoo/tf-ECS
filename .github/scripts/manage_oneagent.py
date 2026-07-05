@@ -10,6 +10,27 @@ def get_clusters(ecs):
         cluster_arns.extend(page.get('clusterArns', []))
     return cluster_arns
 
+def discover_clusters(ecs, project_tag_key, project_tag_value):
+    if project_tag_value:
+        print(f"[INFO] Querying Resource Groups Tagging API for ECS clusters with tag: {project_tag_key}={project_tag_value}")
+        tagging_client = boto3.client('resourcegroupstaggingapi')
+        tagging_paginator = tagging_client.get_paginator('get_resources')
+        cluster_arns = []
+        pages = tagging_paginator.paginate(
+            ResourceTypeFilters=['ecs:cluster'],
+            TagFilters=[{
+                'Key': project_tag_key,
+                'Values': [project_tag_value]
+            }]
+        )
+        for page in pages:
+            for resource in page.get('ResourceTagMappingList', []):
+                cluster_arns.append(resource['ResourceARN'])
+        return cluster_arns
+    else:
+        print("[INFO] No project tag filter specified. Discovering all clusters in region...")
+        return get_clusters(ecs)
+
 def main():
     parser = argparse.ArgumentParser(description="Manage Dynatrace OneAgent on ECS Clusters")
     parser.add_argument('--observe', action='store_true', help="Collect clusters and observe OneAgent status (installed / not installed)")
@@ -22,17 +43,32 @@ def main():
     oneagent_arn = os.environ.get('ONEAGENT_TASK_DEFINITION_ARN')
     service_name = f"dynatrace-oneagent-{environment}"
 
+    # Retrieve and parse monitored clusters whitelist (fallback)
+    monitored_clusters_raw = os.environ.get('MONITORED_CLUSTERS', '*')
+    monitored_clusters = [c.strip() for c in monitored_clusters_raw.split(',') if c.strip()]
+
+    # Retrieve project tagging configurations
+    project_tag_key = os.environ.get('PROJECT_TAG_KEY', 'Project')
+    project_tag_value = os.environ.get('PROJECT_TAG_VALUE', '')
+
     if args.observe:
         print("=== [STAGE] COLLECTING CLUSTERS & OBSERVING INSTALLED STATUS ===")
         try:
-            cluster_arns = get_clusters(ecs)
-            print(f"[INFO] Found {len(cluster_arns)} ECS cluster(s) in region.\n")
+            cluster_arns = discover_clusters(ecs, project_tag_key, project_tag_value)
+            print(f"[INFO] Found {len(cluster_arns)} ECS cluster(s) to scan.\n")
         except Exception as e:
-            print(f"[ERROR] Failed to list ECS clusters: {e}")
+            print(f"[ERROR] Failed to discover ECS clusters: {e}")
             sys.exit(1)
 
         for cluster_arn in cluster_arns:
             cluster_name = cluster_arn.split('/')[-1]
+            
+            # Check whitelist matching only if tag filter was not used (fallback mode)
+            if not project_tag_value:
+                if '*' not in monitored_clusters and cluster_name not in monitored_clusters:
+                    print(f"[SKIP] Cluster '{cluster_name}' is not in MONITORED_CLUSTERS whitelist.")
+                    continue
+
             try:
                 srv_paginator = ecs.get_paginator('list_services')
                 service_arns = []
@@ -54,13 +90,21 @@ def main():
             sys.exit(1)
 
         try:
-            cluster_arns = get_clusters(ecs)
+            cluster_arns = discover_clusters(ecs, project_tag_key, project_tag_value)
+            print(f"[INFO] Found {len(cluster_arns)} ECS cluster(s) to process.\n")
         except Exception as e:
-            print(f"[ERROR] Failed to list ECS clusters: {e}")
+            print(f"[ERROR] Failed to discover ECS clusters: {e}")
             sys.exit(1)
 
         for cluster_arn in cluster_arns:
             cluster_name = cluster_arn.split('/')[-1]
+            
+            # Check whitelist matching only if tag filter was not used (fallback mode)
+            if not project_tag_value:
+                if '*' not in monitored_clusters and cluster_name not in monitored_clusters:
+                    print(f"[SKIP] Cluster '{cluster_name}' is not in MONITORED_CLUSTERS whitelist.")
+                    continue
+
             try:
                 srv_paginator = ecs.get_paginator('list_services')
                 service_arns = []

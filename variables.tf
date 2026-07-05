@@ -71,3 +71,30 @@ variable "tags" {
     Project   = "Dynatrace-ECS-OneAgent-Daemon"
   }
 }
+
+variable "monitored_clusters" {
+  type        = string
+  description = "Comma-separated list of ECS cluster names where Dynatrace OneAgent should be deployed. Use '*' to monitor all clusters."
+  default     = "*"
+}
+
+variable "oneagent_installer_script_url" {
+  type        = string
+  description = "The Dynatrace OneAgent installer script URL (e.g., https://<env-id>.live.dynatrace.com/api/v1/deployment/installer/...)"
+  sensitive   = true
+  default     = ""
+}
+
+variable "project_tag_key" {
+  type        = string
+  description = "The tag key to identify which ECS clusters belong to a project (default: Project)"
+  default     = "Project"
+}
+
+variable "project_tag_value" {
+  type        = string
+  description = "The tag value corresponding to the project (e.g., electricity.com)"
+  default     = ""
+}
+
+

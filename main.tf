@@ -87,6 +87,4 @@ module "auto_observability" {
   environment                  = var.environment
   tags                         = local.project_tags
   monitored_clusters           = var.monitored_clusters
-  project_tag_key              = var.project_tag_key
-  project_tag_value            = var.project_tag_value
 }

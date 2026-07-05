@@ -85,14 +85,8 @@ variable "oneagent_installer_script_url" {
   default     = ""
 }
 
-variable "project_tag_key" {
-  type        = string
-  description = "The tag key to identify which ECS clusters belong to a project (default: Project)"
-  default     = "Project"
-}
-
 variable "project_tag_value" {
   type        = string
-  description = "The tag value corresponding to the project (e.g., electricity.com)"
+  description = "The value of the Project tag to assign to the new resources (e.g. electricity.com)"
   default     = ""
 }

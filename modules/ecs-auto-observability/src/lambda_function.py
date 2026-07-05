@@ -20,50 +20,27 @@ def lambda_handler(event, context):
         logger.error("ONEAGENT_TASK_DEFINITION_ARN environment variable is not defined.")
         return {"status": "error", "message": "ONEAGENT_TASK_DEFINITION_ARN not defined"}
 
-    # Retrieve and parse monitored clusters whitelist (fallback)
+    # Retrieve and parse monitored clusters whitelist
     monitored_clusters_raw = os.environ.get('MONITORED_CLUSTERS', '*')
     monitored_clusters = [c.strip() for c in monitored_clusters_raw.split(',') if c.strip()]
 
-    # Retrieve project tagging configurations
-    project_tag_key = os.environ.get('PROJECT_TAG_KEY', 'Project')
-    project_tag_value = os.environ.get('PROJECT_TAG_VALUE', '')
-
     try:
+        # 1. Discover all ECS clusters in the targeted region
+        paginator = ecs_client.get_paginator('list_clusters')
         cluster_arns = []
+        for page in paginator.paginate():
+            cluster_arns.extend(page.get('clusterArns', []))
 
-        # 1. Discover clusters dynamically using Resource Groups Tagging API if Tag Filter is specified
-        if project_tag_value:
-            logger.info(f"Querying Resource Groups Tagging API for ECS clusters with tag: {project_tag_key}={project_tag_value}")
-            tagging_client = boto3.client('resourcegroupstaggingapi')
-            tagging_paginator = tagging_client.get_paginator('get_resources')
-            pages = tagging_paginator.paginate(
-                ResourceTypeFilters=['ecs:cluster'],
-                TagFilters=[{
-                    'Key': project_tag_key,
-                    'Values': [project_tag_value]
-                }]
-            )
-            for page in pages:
-                for resource in page.get('ResourceTagMappingList', []):
-                    cluster_arns.append(resource['ResourceARN'])
-            logger.info(f"Discovered {len(cluster_arns)} ECS cluster(s) matching tag filter.")
-        else:
-            # Fallback: list all ECS clusters in the region
-            logger.info("No project tag filter specified. Discovering all clusters in region...")
-            paginator = ecs_client.get_paginator('list_clusters')
-            for page in paginator.paginate():
-                cluster_arns.extend(page.get('clusterArns', []))
-            logger.info(f"Discovered {len(cluster_arns)} ECS cluster(s) in region.")
+        logger.info(f"Discovered {len(cluster_arns)} ECS cluster(s) in region.")
 
         # 2. Iterate through each cluster to verify OneAgent Daemon service
         for cluster_arn in cluster_arns:
             cluster_name = cluster_arn.split('/')[-1]
             
-            # Check whitelist matching only if tag filter was not used (fallback mode)
-            if not project_tag_value:
-                if '*' not in monitored_clusters and cluster_name not in monitored_clusters:
-                    logger.info(f"Cluster {cluster_name} is not in MONITORED_CLUSTERS whitelist. Skipping Dynatrace OneAgent installation.")
-                    continue
+            # Check whitelist matching
+            if '*' not in monitored_clusters and cluster_name not in monitored_clusters:
+                logger.info(f"Cluster {cluster_name} is not in MONITORED_CLUSTERS whitelist. Skipping Dynatrace OneAgent installation.")
+                continue
 
             logger.info(f"Checking cluster: {cluster_name}")
 

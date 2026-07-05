@@ -48,7 +48,7 @@ variable "enable_auto_observability" {
 variable "instance_type" {
   type        = string
   description = "The EC2 instance type for the ECS hosts"
-  default     = "t3.medium"
+  default     = "t2.micro"
 }
 
 variable "ami_id" {

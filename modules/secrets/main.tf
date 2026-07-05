@@ -9,7 +9,7 @@ resource "aws_secretsmanager_secret" "api_url" {
 
 resource "aws_secretsmanager_secret_version" "api_url" {
   secret_id     = aws_secretsmanager_secret.api_url.id
-  secret_string = var.dynatrace_url
+  secret_string = var.dynatrace_url != "" ? var.dynatrace_url : "PLACEHOLDER"
 }
 
 # tfsec:ignore:aws-ssm-secret-use-customer-key
@@ -23,5 +23,5 @@ resource "aws_secretsmanager_secret" "paas_token" {
 
 resource "aws_secretsmanager_secret_version" "paas_token" {
   secret_id     = aws_secretsmanager_secret.paas_token.id
-  secret_string = var.dynatrace_paas_token
+  secret_string = var.dynatrace_paas_token != "" ? var.dynatrace_paas_token : "PLACEHOLDER"
 }

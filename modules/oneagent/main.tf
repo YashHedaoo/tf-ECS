@@ -16,10 +16,11 @@ resource "aws_ecs_task_definition" "oneagent" {
 
   container_definitions = jsonencode([
     {
-      name       = "dynatrace-oneagent"
-      image      = var.oneagent_image
-      essential  = true
-      privileged = true
+      name              = "dynatrace-oneagent"
+      image             = var.oneagent_image
+      essential         = true
+      privileged        = true
+      memoryReservation = 300
 
       secrets = [
         {

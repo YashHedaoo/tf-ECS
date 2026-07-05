@@ -33,34 +33,10 @@ variable "cluster_name" {
   default     = "ecs-oneagent-cluster"
 }
 
-variable "is_new_project" {
-  type        = bool
-  description = "Whether this is a completely new project (creates new VPC, cluster, and EC2 capacity) or an existing project (deploys OneAgent onto an existing cluster)"
-  default     = false
-}
-
 variable "enable_auto_observability" {
   type        = bool
   description = "Whether to enable the Lambda-based region-wide auto-observability scanner"
   default     = false
-}
-
-variable "instance_type" {
-  type        = string
-  description = "The EC2 instance type for the ECS hosts"
-  default     = "t2.micro"
-}
-
-variable "ami_id" {
-  type        = string
-  description = "The ECS optimized AMI ID. If empty, the latest is fetched dynamically."
-  default     = ""
-}
-
-variable "availability_zones" {
-  type        = list(string)
-  description = "The availability zones to deploy into"
-  default     = ["us-east-1a", "us-east-1b"]
 }
 
 variable "tags" {

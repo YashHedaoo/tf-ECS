@@ -9,11 +9,6 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      is_new_project:
-        description: 'Is this a completely new project? (true/false)'
-        type: boolean
-        required: true
-        default: false
       cluster_name:
         description: 'ECS Cluster Name (to create or install OneAgent on)'
         type: string
@@ -49,7 +44,6 @@ jobs:
           TF_VAR_dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}
           TF_VAR_oneagent_installer_script_url: ${{ secrets.ONEAGENT_INSTALLER_SCRIPT_URL }}
           TF_VAR_monitored_clusters: ${{ secrets.MONITORED_CLUSTERS }}
-          TF_VAR_is_new_project: ${{ github.event.inputs.is_new_project != '' && github.event.inputs.is_new_project || 'false' }}
           TF_VAR_cluster_name: ${{ github.event.inputs.cluster_name != '' && github.event.inputs.cluster_name || 'ecs-oneagent-cluster' }}
         run: |
           terraform init

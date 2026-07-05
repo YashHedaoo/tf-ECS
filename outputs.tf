@@ -1,11 +1,6 @@
-output "vpc_id" {
-  description = "The ID of the created VPC"
-  value       = var.is_new_project ? module.networking[0].vpc_id : null
-}
-
 output "ecs_cluster_name" {
   description = "The name of the ECS cluster"
-  value       = module.ecs_cluster.cluster_name
+  value       = data.aws_ecs_cluster.existing.cluster_name
 }
 
 output "auto_observability_lambda_arn" {

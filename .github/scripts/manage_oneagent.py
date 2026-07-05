@@ -23,15 +23,17 @@ def main():
     service_name = f"dynatrace-oneagent-{environment}"
 
     if args.observe:
-        print("=== [STAGE] COLLECTING CLUSTERS & OBSERVING INSTALLED STATUS ===")
+        print("============================================================")
+        print("🔍 STAGE: COLLECTING CLUSTERS & OBSERVING INSTALLED STATUS")
+        print("============================================================")
         try:
             cluster_arns = get_clusters(ecs)
             if not cluster_arns:
-                print("[INFO] No ECS clusters are present in this region.")
+                print("ℹ️ [INFO] No ECS clusters are present in this region.")
                 return
-            print(f"[INFO] Scanning {len(cluster_arns)} ECS cluster(s).\n")
+            print(f"📋 Found {len(cluster_arns)} ECS cluster(s) to scan.\n")
         except Exception as e:
-            print(f"[ERROR] Failed to obtain ECS clusters: {e}")
+            print(f"❌ [ERROR] Failed to obtain ECS clusters: {e}")
             sys.exit(1)
 
         for cluster_arn in cluster_arns:
@@ -45,25 +47,28 @@ def main():
                 
                 has_oneagent = any(arn.split('/')[-1] == service_name for arn in service_arns)
                 if has_oneagent:
-                    print(f"[*] Cluster Name: '{cluster_name}' -> STATUS: Dynatrace OneAgent INSTALLED")
+                    print(f"✅ Cluster: '{cluster_name}' -> STATUS: Dynatrace OneAgent INSTALLED")
                 else:
-                    print(f"[*] Cluster Name: '{cluster_name}' -> STATUS: Dynatrace OneAgent NOT INSTALLED")
+                    print(f"⚠️ Cluster: '{cluster_name}' -> STATUS: Dynatrace OneAgent NOT INSTALLED")
             except Exception as e:
-                print(f"[ERROR] Failed to inspect cluster '{cluster_name}': {e}")
+                print(f"❌ [ERROR] Failed to inspect cluster '{cluster_name}': {e}")
+        print("============================================================")
 
     elif args.install:
-        print("=== [STAGE] INSTALLING ONEAGENT IN CLUSTERS LACKING IT ===")
+        print("============================================================")
+        print("🚀 STAGE: INSTALLING ONEAGENT IN CLUSTERS LACKING IT")
+        print("============================================================")
         if not oneagent_arn:
-            print("[ERROR] ONEAGENT_TASK_DEFINITION_ARN environment variable is missing.")
+            print("❌ [ERROR] ONEAGENT_TASK_DEFINITION_ARN environment variable is missing.")
             sys.exit(1)
 
         try:
             cluster_arns = get_clusters(ecs)
             if not cluster_arns:
-                print("[INFO] No ECS clusters are present in this region.")
+                print("ℹ️ [INFO] No ECS clusters are present in this region.")
                 return
         except Exception as e:
-            print(f"[ERROR] Failed to obtain ECS clusters: {e}")
+            print(f"❌ [ERROR] Failed to obtain ECS clusters: {e}")
             sys.exit(1)
 
         for cluster_arn in cluster_arns:
@@ -76,7 +81,7 @@ def main():
                 
                 has_oneagent = any(arn.split('/')[-1] == service_name for arn in service_arns)
                 if not has_oneagent:
-                    print(f"[ACTION] Cluster '{cluster_name}' lacks OneAgent. Installing...")
+                    print(f"⚡ [ACTION] Cluster '{cluster_name}' lacks OneAgent. Installing...")
                     ecs.create_service(
                         cluster=cluster_arn,
                         serviceName=service_name,
@@ -84,11 +89,12 @@ def main():
                         schedulingStrategy='DAEMON',
                         launchType='EC2'
                     )
-                    print(f"[SUCCESS] Scheduled Dynatrace OneAgent daemon service on cluster '{cluster_name}'")
+                    print(f"🎉 [SUCCESS] Scheduled Dynatrace OneAgent daemon service on cluster '{cluster_name}'")
                 else:
-                    print(f"[SKIP] Cluster '{cluster_name}' already has OneAgent. Skipping installation.")
+                    print(f"⏭️ [SKIP] Cluster '{cluster_name}' already has OneAgent. Skipping installation.")
             except Exception as e:
-                print(f"[ERROR] Failed to deploy on cluster '{cluster_name}': {e}")
+                print(f"❌ [ERROR] Failed to deploy on cluster '{cluster_name}': {e}")
+        print("============================================================")
 
     else:
         parser.print_help()

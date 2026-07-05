@@ -42,13 +42,21 @@ jobs:
           arns = []
           for page in paginator.paginate():
               arns.extend(page.get('clusterArns', []))
+          sys.stderr.write('============================================================\n')
+          sys.stderr.write('🔍 ECS CLUSTER REGIONAL SEARCH\n')
+          sys.stderr.write('============================================================\n')
+          if not arns:
+              sys.stderr.write('ℹ️ No active ECS clusters discovered in the region.\n')
           for arn in arns:
-              sys.stderr.write(f'[INFO] Discovered ECS cluster in region: {arn.split(\"/\")[-1]}\n')
+              sys.stderr.write(f'✨ Discovered ECS Cluster: {arn.split(\"/\")[-1]}\n')
+          sys.stderr.write('============================================================\n')
           print('true' if len(arns) > 0 else 'false')
           ")
           echo "clusters_exist=${CLUSTERS_EXIST}" >> $GITHUB_OUTPUT
           if [ "${CLUSTERS_EXIST}" = "false" ]; then
-            echo "[INFO] No ECS clusters are present in this region. Skipping deployment steps."
+            echo "============================================================"
+            echo "🚫 SKIPPING STAGES: No ECS clusters present. Workflow terminating cleanly."
+            echo "============================================================"
           fi
 
       - name: Setup Terraform

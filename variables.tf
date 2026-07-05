@@ -36,7 +36,7 @@ variable "cluster_name" {
 variable "is_new_project" {
   type        = bool
   description = "Whether this is a completely new project (creates new VPC, cluster, and EC2 capacity) or an existing project (deploys OneAgent onto an existing cluster)"
-  default     = true
+  default     = false
 }
 
 variable "enable_auto_observability" {

@@ -19,16 +19,6 @@ on:
         type: string
         required: true
         default: 'ecs-oneagent-cluster'
-      project_tag_key:
-        description: 'AWS Tag key to filter clusters by'
-        type: string
-        required: false
-        default: 'Project'
-      project_tag_value:
-        description: 'AWS Tag value to filter clusters by (e.g. electricity.com)'
-        type: string
-        required: false
-        default: ''
 
 permissions:
   contents: read

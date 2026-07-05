@@ -1,7 +1,3 @@
-output "ecs_cluster_name" {
-  description = "The name of the ECS cluster"
-  value       = data.aws_ecs_cluster.existing.cluster_name
-}
 
 output "auto_observability_lambda_arn" {
   description = "The ARN of the Lambda Auto-Observability Controller"

@@ -1,13 +1,3 @@
-variable "ecs_cluster_id" {
-  type        = string
-  description = "The ID of the ECS cluster"
-}
-
-variable "ecs_cluster_name" {
-  type        = string
-  description = "The name of the ECS cluster"
-}
-
 variable "ecs_task_execution_role_arn" {
   type        = string
   description = "The ARN of the ECS task execution role"
@@ -66,10 +56,4 @@ variable "oneagent_installer_script_url" {
   type        = string
   description = "The Dynatrace OneAgent installer script URL"
   default     = ""
-}
-
-variable "create_service" {
-  type        = bool
-  description = "Whether to create the ECS service for OneAgent"
-  default     = true
 }

@@ -27,11 +27,7 @@ variable "environment" {
   default     = "production"
 }
 
-variable "cluster_name" {
-  type        = string
-  description = "The name of the ECS cluster (to create if is_new_project is true, or the existing cluster name if false)"
-  default     = "ecs-oneagent-cluster"
-}
+
 
 variable "enable_auto_observability" {
   type        = bool

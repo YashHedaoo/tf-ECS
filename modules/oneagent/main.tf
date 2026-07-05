@@ -38,10 +38,6 @@ resource "aws_ecs_task_definition" "oneagent" {
           value = var.network_zone
         },
         {
-          name  = "DT_CLUSTER_ID"
-          value = var.ecs_cluster_name
-        },
-        {
           name  = "ONEAGENT_INSTALLER_SCRIPT_URL"
           value = var.oneagent_installer_script_url
         }
@@ -104,13 +100,4 @@ resource "aws_ecs_task_definition" "oneagent" {
   tags = var.tags
 }
 
-resource "aws_ecs_service" "oneagent" {
-  count               = var.create_service ? 1 : 0
-  name                = "dynatrace-oneagent-${var.environment}"
-  cluster             = var.ecs_cluster_id
-  task_definition     = aws_ecs_task_definition.oneagent.arn
-  scheduling_strategy = "DAEMON"
-  launch_type         = "EC2"
 
-  tags = var.tags
-}

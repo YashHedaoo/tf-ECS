@@ -46,7 +46,7 @@ jobs:
           TF_VAR_cluster_name: ${{ github.event.inputs.cluster_name != '' && github.event.inputs.cluster_name || 'ecs-oneagent-cluster' }}
         run: |
           terraform init
-          terraform apply -auto-approve -no-color
+          terraform apply -auto-approve -no-color -lock=false
 
       - name: Install Python Dependencies
         run: pip install boto3

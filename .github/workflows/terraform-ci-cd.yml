@@ -36,12 +36,14 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
         run: |
           CLUSTERS_EXIST=$(python3 -c "
-          import boto3
+          import boto3, sys
           ecs = boto3.client('ecs')
           paginator = ecs.get_paginator('list_clusters')
           arns = []
           for page in paginator.paginate():
               arns.extend(page.get('clusterArns', []))
+          for arn in arns:
+              sys.stderr.write(f'[INFO] Discovered ECS cluster in region: {arn.split(\"/\")[-1]}\n')
           print('true' if len(arns) > 0 else 'false')
           ")
           echo "clusters_exist=${CLUSTERS_EXIST}" >> $GITHUB_OUTPUT

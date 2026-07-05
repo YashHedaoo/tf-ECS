@@ -68,3 +68,8 @@ variable "oneagent_installer_script_url" {
   default     = ""
 }
 
+variable "create_service" {
+  type        = bool
+  description = "Whether to create the ECS service for OneAgent"
+  default     = true
+}

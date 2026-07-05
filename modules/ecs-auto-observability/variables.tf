@@ -25,8 +25,8 @@ variable "tags" {
 }
 
 variable "monitored_clusters" {
-  type        = string
-  description = "Comma-separated list of ECS cluster names where Dynatrace OneAgent should be deployed."
+  type        = list(string)
+  description = "List of ECS cluster names where Dynatrace OneAgent should be deployed."
 }
 
 variable "project_tag_key" {
@@ -40,5 +40,3 @@ variable "project_tag_value" {
   description = "The tag value corresponding to the project (e.g., electricity.com)"
   default     = ""
 }
-
-

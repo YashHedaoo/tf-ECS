@@ -103,3 +103,14 @@ resource "aws_ecs_task_definition" "oneagent" {
 
   tags = var.tags
 }
+
+resource "aws_ecs_service" "oneagent" {
+  count               = var.create_service ? 1 : 0
+  name                = "dynatrace-oneagent-${var.environment}"
+  cluster             = var.ecs_cluster_id
+  task_definition     = aws_ecs_task_definition.oneagent.arn
+  scheduling_strategy = "DAEMON"
+  launch_type         = "EC2"
+
+  tags = var.tags
+}

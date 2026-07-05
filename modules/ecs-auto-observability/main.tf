@@ -21,7 +21,7 @@ resource "aws_lambda_function" "auto_observability" {
     variables = {
       ENVIRONMENT                  = var.environment
       ONEAGENT_TASK_DEFINITION_ARN = var.oneagent_task_definition_arn
-      MONITORED_CLUSTERS           = var.monitored_clusters
+      MONITORED_CLUSTERS           = join(",", var.monitored_clusters)
       PROJECT_TAG_KEY              = var.project_tag_key
       PROJECT_TAG_VALUE            = var.project_tag_value
     }

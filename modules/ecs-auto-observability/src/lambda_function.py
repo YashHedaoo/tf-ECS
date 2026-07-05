@@ -27,6 +27,10 @@ def lambda_handler(event, context):
         for page in paginator.paginate():
             cluster_arns.extend(page.get('clusterArns', []))
 
+        if not cluster_arns:
+            logger.info("No ECS clusters are present in this region.")
+            return {"status": "success", "message": "No ECS clusters present"}
+
         logger.info(f"Discovered {len(cluster_arns)} ECS cluster(s) in region.")
 
         # 2. Iterate through each cluster to verify OneAgent Daemon service

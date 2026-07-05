@@ -26,6 +26,9 @@ def main():
         print("=== [STAGE] COLLECTING CLUSTERS & OBSERVING INSTALLED STATUS ===")
         try:
             cluster_arns = get_clusters(ecs)
+            if not cluster_arns:
+                print("[INFO] No ECS clusters are present in this region.")
+                return
             print(f"[INFO] Scanning {len(cluster_arns)} ECS cluster(s).\n")
         except Exception as e:
             print(f"[ERROR] Failed to obtain ECS clusters: {e}")
@@ -56,6 +59,9 @@ def main():
 
         try:
             cluster_arns = get_clusters(ecs)
+            if not cluster_arns:
+                print("[INFO] No ECS clusters are present in this region.")
+                return
         except Exception as e:
             print(f"[ERROR] Failed to obtain ECS clusters: {e}")
             sys.exit(1)

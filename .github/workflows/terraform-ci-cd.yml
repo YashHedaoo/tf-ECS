@@ -27,12 +27,36 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Install Python Dependencies
+        run: pip install boto3
+
+      - name: Check for ECS Clusters
+        id: check_ecs
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+        run: |
+          CLUSTERS_EXIST=$(python3 -c "
+          import boto3
+          ecs = boto3.client('ecs')
+          paginator = ecs.get_paginator('list_clusters')
+          arns = []
+          for page in paginator.paginate():
+              arns.extend(page.get('clusterArns', []))
+          print('true' if len(arns) > 0 else 'false')
+          ")
+          echo "clusters_exist=${CLUSTERS_EXIST}" >> $GITHUB_OUTPUT
+          if [ "${CLUSTERS_EXIST}" = "false" ]; then
+            echo "[INFO] No ECS clusters are present in this region. Skipping deployment steps."
+          fi
+
       - name: Setup Terraform
+        if: steps.check_ecs.outputs.clusters_exist == 'true'
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.0
 
       - name: Deploy Base Infrastructure (TF)
+        if: steps.check_ecs.outputs.clusters_exist == 'true'
         env:
           TF_VAR_dynatrace_url: ${{ secrets.DYNATRACE_URL }}
           TF_VAR_dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}
@@ -41,16 +65,15 @@ jobs:
           terraform init
           terraform apply -auto-approve -no-color -lock=false
 
-      - name: Install Python Dependencies
-        run: pip install boto3
-
       - name: Collecting and Observing Clusters
+        if: steps.check_ecs.outputs.clusters_exist == 'true'
         env:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
         run: |
           python3 .github/scripts/manage_oneagent.py --observe
 
       - name: Installing OneAgent in Missing Clusters
+        if: steps.check_ecs.outputs.clusters_exist == 'true'
         env:
           ENVIRONMENT: "production"
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
